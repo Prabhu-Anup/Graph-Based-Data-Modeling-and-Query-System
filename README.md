@@ -217,6 +217,30 @@ http://127.0.0.1:8000/graph
 * Clean ID schema (`type:id`) for consistency
 
 ---
+## LLM Query System
+
+The system supports natural language queries over the dataset.
+
+### Flow
+
+User Query → LLM → SQL → Database → Result → Natural Language Answer
+
+### Features
+
+* Natural language understanding using Gemini
+* Dynamic SQL generation
+* Execution on database
+* Human-readable responses
+* Guardrails for domain restriction
+
+### Example
+
+**Input:**
+"Total number of orders"
+
+**Output:**
+"There are 100 orders in total."
+
 
 ## Author
 
