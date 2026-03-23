@@ -2,13 +2,21 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Body, Depends, FastAPI
 from pydantic import BaseModel
 from sqlalchemy import func, select, text
+from sqlalchemy.orm import Session
 
 from database import get_session, init_db
 from graph_builder import build_graph
-from query_service import run_nl_query
+from query_engine import handle_query
+
+def get_db():
+    session = get_session()
+    try:
+        yield session
+    finally:
+        session.close()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,15 +50,9 @@ def get_graph() -> dict:
         return build_graph(session)
 
 
-class QueryRequest(BaseModel):
-    query: str
-
-
 @app.post("/query", tags=["Query"])
-def query_data(request: QueryRequest) -> dict:
-    with get_session() as session:
-        result = run_nl_query(session=session, user_query=request.query)
-    return result.to_dict()
+def query_data(user_query: str = Body(..., embed=True), db: Session = Depends(get_db)):
+    return handle_query(user_query, db)
 
 
 @app.get("/test-data", tags=["Health"])
