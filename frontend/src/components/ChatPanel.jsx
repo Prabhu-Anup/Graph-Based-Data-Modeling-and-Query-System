@@ -15,7 +15,7 @@ export default function ChatPanel() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://127.0.0.1:8000/query", { user_query: userMessage.text });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/query`, { user_query: userMessage.text });
 
       const botMessage = {
         sender: "bot",
