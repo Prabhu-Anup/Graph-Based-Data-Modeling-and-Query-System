@@ -44,28 +44,28 @@ export default function GraphView() {
     setSelectedNode(node);
     let count = 0;
     edges.forEach(e => {
-        if (e.source === node.id || e.target === node.id) count++;
+      if (e.source === node.id || e.target === node.id) count++;
     });
     setConnectedCount(count);
   };
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/graph")
+    axios.get(`${import.meta.env.VITE_API_URL}/graph`)
       .then(res => {
         const { nodes: backendNodes, edges: backendEdges } = res.data;
 
         const rfNodes = backendNodes.map((n) => {
           const themeColor = getColor(n.type);
-          
+
           return {
             id: n.id,
             type: "dot",
-            data: { 
-              originalType: n.type, 
+            data: {
+              originalType: n.type,
               metadata: n.metadata,
               themeColor: themeColor,
               isPayment: n.type === "Payment"
-            }, 
+            },
             position: { x: Math.random() * 1200, y: Math.random() * 800 }
           }
         });
@@ -76,7 +76,7 @@ export default function GraphView() {
           target: e.target,
           type: "straight", // Razor sharp straight trajectories
           animated: false,
-          style: { 
+          style: {
             stroke: "#bae6fd", // crisp light blue lines
             strokeWidth: 1.2,
             opacity: 0.6
@@ -90,7 +90,7 @@ export default function GraphView() {
 
   return (
     <div style={{ height: "100%", width: "100%", background: "#ffffff", position: "relative" }}>
-      
+
       {/* Dynamic Legend */}
       <div style={{
         position: "absolute",
@@ -143,7 +143,7 @@ export default function GraphView() {
       {selectedNode && (
         <div style={{
           position: "absolute",
-          top: 70, 
+          top: 70,
           left: 16,
           zIndex: 20,
           background: "#ffffff",
@@ -167,10 +167,10 @@ export default function GraphView() {
               <span style={{ fontWeight: "600", marginRight: "6px", minWidth: "120px" }}>Entity:</span>
               <span>{selectedNode.data?.originalType}</span>
             </div>
-            
+
             {selectedNode.data?.metadata && Object.entries(selectedNode.data.metadata).map(([key, value]) => {
               if (value === null || value === undefined) return null;
-              
+
               const formattedKey = key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
               return (
                 <div key={key} style={{ display: "flex", wordBreak: "break-word" }}>
@@ -179,7 +179,7 @@ export default function GraphView() {
                 </div>
               );
             })}
-            
+
             <div style={{ fontSize: "11px", color: "#9ca3af", fontStyle: "italic", marginTop: "12px", borderTop: "1px solid #f3f4f6", paddingTop: "8px" }}>
               Additional fields hidden for readability
             </div>
@@ -190,7 +190,7 @@ export default function GraphView() {
           </div>
         </div>
       )}
-      
+
     </div>
   );
 }
