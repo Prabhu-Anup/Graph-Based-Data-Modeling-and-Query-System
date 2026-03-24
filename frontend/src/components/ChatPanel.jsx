@@ -16,12 +16,12 @@ export default function ChatPanel() {
 
     try {
       const res = await axios.post("http://127.0.0.1:8000/query", { user_query: userMessage.text });
-      
-      const botMessage = { 
-        sender: "bot", 
+
+      const botMessage = {
+        sender: "bot",
         text: res.data.answer || (res.data.error ? `Error: ${res.data.error}` : "No answer received.")
       };
-      
+
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       setMessages((prev) => [...prev, { sender: "bot", text: "Error communicating with backend." }]);
@@ -32,16 +32,16 @@ export default function ChatPanel() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", boxSizing: "border-box", fontFamily: "system-ui, -apple-system, sans-serif" }}>
-      
+
       {/* Header */}
       <div style={{ padding: "16px 24px", borderBottom: "1px solid #f3f4f6" }}>
         <h3 style={{ margin: 0, fontSize: "13px", fontWeight: "700", color: "#111827" }}>Chat with Graph</h3>
         <p style={{ margin: "4px 0 0 0", fontSize: "11px", color: "#6b7280" }}>Order to Cash</p>
       </div>
-      
+
       {/* Chat History */}
       <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
-        
+
         {/* Default Greeting */}
         <div style={{ display: "flex", gap: "12px", marginBottom: "28px" }}>
           <div style={{ width: 36, height: 36, minWidth: 36, background: "#111827", color: "#ffffff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "16px" }}>
@@ -59,17 +59,17 @@ export default function ChatPanel() {
 
         {/* User & AI Messages */}
         {messages.map((msg, idx) => (
-          <div key={idx} style={{ 
-            display: "flex", 
-            gap: "12px", 
+          <div key={idx} style={{
+            display: "flex",
+            gap: "12px",
             marginBottom: "24px",
             flexDirection: msg.sender === "user" ? "row-reverse" : "row"
           }}>
-             {msg.sender === "bot" && (
-                <div style={{ width: 36, height: 36, minWidth: 36, background: "#111827", color: "#ffffff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "16px" }}>
-                  D
-                </div>
-             )}
+            {msg.sender === "bot" && (
+              <div style={{ width: 36, height: 36, minWidth: 36, background: "#111827", color: "#ffffff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "16px" }}>
+                D
+              </div>
+            )}
             <div style={{
               background: msg.sender === "user" ? "#f8fafc" : "transparent",
               padding: msg.sender === "user" ? "12px 16px" : "0",
@@ -88,9 +88,9 @@ export default function ChatPanel() {
 
       {/* Input Area container */}
       <div style={{ padding: "0 24px 24px 24px" }}>
-        <div style={{ 
-          border: "1px solid #e5e7eb", 
-          borderRadius: "8px", 
+        <div style={{
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
           padding: "16px",
           background: "#ffffff",
           boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
@@ -104,16 +104,16 @@ export default function ChatPanel() {
           </div>
 
           <div style={{ display: "flex", alignItems: "flex-end" }}>
-            <textarea 
-              value={query} 
-              onChange={(e) => setQuery(e.target.value)} 
-              placeholder="Analyze anything" 
-              style={{ 
-                flex: 1, 
-                border: "none", 
-                outline: "none", 
-                resize: "none", 
-                padding: "8px 0px", 
+            <textarea
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Analyze anything"
+              style={{
+                flex: 1,
+                border: "none",
+                outline: "none",
+                resize: "none",
+                padding: "8px 0px",
                 fontSize: "13px",
                 fontFamily: "inherit",
                 minHeight: "44px"
@@ -125,15 +125,15 @@ export default function ChatPanel() {
                 }
               }}
             />
-            <button 
-              onClick={handleSend} 
-              disabled={loading || !query.trim()} 
-              style={{ 
-                padding: "8px 16px", 
-                borderRadius: "6px", 
-                border: "none", 
-                background: "#8f96a3", 
-                color: "white", 
+            <button
+              onClick={handleSend}
+              disabled={loading || !query.trim()}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "6px",
+                border: "none",
+                background: "#8f96a3",
+                color: "white",
                 cursor: (loading || !query.trim()) ? "not-allowed" : "pointer",
                 fontWeight: "600",
                 fontSize: "12px",
