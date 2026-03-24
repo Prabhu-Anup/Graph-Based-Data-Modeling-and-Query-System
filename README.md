@@ -4,25 +4,53 @@
 
 In real-world enterprise systems, business data is distributed across multiple tables such as orders, deliveries, invoices, and payments. These datasets often lack an intuitive way to trace relationships across entities.
 
-This project addresses that challenge by transforming structured relational data into a **graph-based representation**, enabling seamless traversal and relationship analysis across entities.
+This project transforms structured relational data into a **graph-based representation**, enabling seamless traversal, traceability, and analysis of business processes.
 
-The system builds a **context graph** where nodes represent business entities and edges represent relationships between them.
+A **context graph** is constructed where:
+
+* Nodes represent business entities
+* Edges represent relationships between them
+
+Additionally, the system integrates an **LLM-powered query interface**, allowing users to interact with the data using natural language.
 
 ---
 
 ## Objective
 
-* Convert relational business data into a graph structure
+* Convert relational data into a graph structure
 
-* Model end-to-end business flow:
+* Model complete business flow:
 
-  Customer → Order → Delivery → Invoice → Payment
+  **Customer → Order → Delivery → Invoice → Payment**
 
-* Enable future support for:
+* Enable:
 
   * Natural language querying
   * Graph visualization
-  * Flow tracing and anomaly detection
+  * Flow tracing
+  * Data-driven insights
+
+---
+
+## System Architecture
+
+```text
+User (Frontend UI)
+        ↓
+Chat Interface (React)
+        ↓
+FastAPI Backend (/query)
+        ↓
+LLM (Gemini)
+        ↓
+SQL Generation
+        ↓
+Database Execution
+        ↓
+Result Processing
+        ↓
+Natural Language Answer
+```
 
 ---
 
@@ -30,7 +58,7 @@ The system builds a **context graph** where nodes represent business entities an
 
 ### 1. Graph Construction
 
-The system ingests structured data and constructs a graph consisting of:
+The system constructs a graph from structured data.
 
 #### Nodes
 
@@ -44,7 +72,7 @@ The system ingests structured data and constructs a graph consisting of:
 
 Each node contains:
 
-* Unique ID
+* Unique ID (`type:id`)
 * Type
 * Metadata (business attributes)
 
@@ -52,7 +80,7 @@ Each node contains:
 
 ### 2. Relationships (Edges)
 
-The graph models real business relationships:
+The graph models real-world business flows:
 
 * Customer → Order (`PLACED`)
 * Order → OrderItem (`CONTAINS`)
@@ -61,16 +89,16 @@ The graph models real business relationships:
 * Delivery → Invoice (`DELIVERY_TO_INVOICE`)
 * Invoice → Payment (`INVOICE_TO_PAYMENT`)
 
-This enables full lifecycle tracing of transactions.
+This enables **end-to-end traceability**.
 
 ---
 
 ### 3. Data Normalization
 
-* Numeric fields converted from strings to numbers
+* Converted numeric fields from strings:
 
   * `total_net_amount`, `net_amount`, `quantity`
-* Free items identified:
+* Identified free items:
 
   * `is_free_item = true` when `net_amount == 0`
 
@@ -80,20 +108,16 @@ This enables full lifecycle tracing of transactions.
 
 * Duplicate nodes prevented using sets
 * Duplicate edges avoided
-* Edges created only if both nodes exist
-* Null and invalid references handled safely
+* Edges created only when both nodes exist
+* Null values handled safely
 
 ---
 
-### 5. API
+### 5. Backend API (FastAPI)
 
-Built using FastAPI.
+#### Endpoints
 
-#### Endpoint
-
-`GET /graph`
-
-Returns:
+**GET /graph**
 
 ```json
 {
@@ -102,14 +126,80 @@ Returns:
 }
 ```
 
+**POST /query**
+
+```json
+{
+  "user_query": "total number of orders"
+}
+```
+
+Returns:
+
+```json
+{
+  "answer": "There are 100 orders in total.",
+  "generated_sql": "...",
+  "result": [...]
+}
+```
+
+---
+
+## LLM Query System
+
+The system enables **natural language interaction with data**.
+
+### Flow
+
+User Query → LLM → SQL → Database → Result → Natural Language Answer
+
+### Features
+
+* Natural language understanding using **Google Gemini**
+* Dynamic SQL generation
+* Execution on database
+* Human-readable responses
+* Domain-specific guardrails
+
+---
+
+## Frontend UI
+
+A React-based interactive interface is implemented.
+
+### Features
+
+* Graph visualization using **React Flow**
+* Interactive node exploration (click to view metadata)
+* Chat interface for querying data
+* Real-time responses from backend
+
+### Layout
+
+* Left: Graph visualization
+* Right: Chat assistant panel
+
 ---
 
 ## Tech Stack
 
-* **Backend:** Python, FastAPI
-* **Database ORM:** SQLAlchemy
-* **Data Processing:** Python
-* **Architecture:** Graph-based modeling over relational data
+### Backend
+
+* Python
+* FastAPI
+* SQLAlchemy
+* SQLite
+
+### Frontend
+
+* React (Vite)
+* React Flow
+* Axios
+
+### AI / LLM
+
+* Google Gemini API
 
 ---
 
@@ -118,133 +208,114 @@ Returns:
 ```
 project-root/
 │
-├── main.py                # FastAPI app entry point
-├── graph_builder.py       # Core graph construction logic
-├── models.py              # Database models
-├── database.py            # DB connection and session
-├── requirements.txt       # Dependencies
-├── README.md              # Documentation
-└── data/                  # Dataset (CSV or source files)
+├── main.py
+├── graph_builder.py
+├── query_engine.py
+├── models.py
+├── database.py
+│── requirements.txt
+│
+├── frontend/
+│   ├── src/
+│   ├── components/
+│   └── package.json
+│
+├── data/
+└── README.md
 ```
 
 ---
 
 ## How to Run
 
-### 1. Create Virtual Environment
+### Backend
 
 ```bash
 python -m venv venv
 venv\Scripts\activate   # Windows
-```
-
----
-
-### 2. Install Dependencies
-
-```bash
 pip install -r requirements.txt
-```
-
----
-
-### 3. Run Server
-
-```bash
 uvicorn main:app --reload
 ```
 
 ---
 
-### 4. Access API
+### Frontend
 
-Open:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend runs on:
 
 ```
-http://127.0.0.1:8000/graph
+http://localhost:5173
 ```
 
 ---
 
-## Example Use Cases
+## Example Queries
 
-* Trace full lifecycle of an order
-* Identify relationships between customers and products
-* Analyze order composition
-* Detect incomplete business flows (future enhancement)
+* "Total number of orders"
+* "Total revenue"
+* "Top products by billing"
+* "Trace a full order flow"
+
+---
+
+## Guardrails
+
+* Restricts queries to dataset domain
+* Rejects unrelated queries (e.g., jokes, general knowledge)
+* Ensures responses are data-backed
+
+---
+
+## Key Design Decisions
+
+* Graph abstraction over relational schema for traceability
+* Separation of node and edge creation
+* Use of sets for deduplication
+* Clean ID schema (`type:id`)
+* LLM-driven dynamic query generation
 
 ---
 
 ## Current Status
 
 ✔ Graph construction completed
-✔ All entities modeled
-✔ Relationships implemented
-✔ Clean and validated data
+✔ Full relationship modeling
+✔ LLM-powered query system
+✔ SQL execution + natural answers
+✔ Interactive frontend UI
 
 ---
 
-## Planned Enhancements
+## Future Enhancements
 
-### 1. Conversational Query Interface (LLM Integration)
-
-* Natural language → structured queries
-* Data-backed responses
-
-### 2. Graph Visualization UI
-
-* Interactive node exploration
-* Relationship highlighting
-
-### 3. Advanced Querying
-
-* Identify incomplete flows
-* Revenue analysis
-* Product performance insights
-
-### 4. Guardrails
-
-* Restrict queries to dataset domain
-* Reject unrelated prompts
+* Highlight nodes based on query results
+* Advanced graph analytics (clustering, anomaly detection)
+* Conversation memory
+* Streaming LLM responses
+* Deployment (Docker + cloud hosting)
 
 ---
 
-## Key Design Decisions
+## Demo Flow
 
-* Graph abstraction over relational schema for better traceability
-* Separation of node and edge creation for clarity
-* Use of sets for deduplication and performance
-* Clean ID schema (`type:id`) for consistency
+1. Open frontend UI
+2. Enter query (e.g., "total orders")
+3. System generates SQL
+4. Executes query
+5. Returns natural language answer
+6. Explore graph relationships interactively
 
 ---
-## LLM Query System
-
-The system supports natural language queries over the dataset.
-
-### Flow
-
-User Query → LLM → SQL → Database → Result → Natural Language Answer
-
-### Features
-
-* Natural language understanding using Gemini
-* Dynamic SQL generation
-* Execution on database
-* Human-readable responses
-* Guardrails for domain restriction
-
-### Example
-
-**Input:**
-"Total number of orders"
-
-**Output:**
-"There are 100 orders in total."
-
 
 ## Author
 
-Anup Rajesh Prabhu
+**Anup Rajesh Prabhu**
 
 ---
 
