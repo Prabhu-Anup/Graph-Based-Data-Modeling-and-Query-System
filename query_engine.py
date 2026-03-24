@@ -2,7 +2,8 @@ import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+from sqlalchemy import text, inspect
+from database import engine
 
 # Load environment entries from .env
 load_dotenv()
@@ -17,15 +18,21 @@ genai.configure(api_key=api_key)
 # Initialize model
 model = genai.GenerativeModel("gemini-2.5-flash")
 
+def get_db_schema() -> str:
+    inspector = inspect(engine)
+    schema = []
+    for table_name in inspector.get_table_names():
+        columns = inspector.get_columns(table_name)
+        col_strs = [f"{col['name']} ({col['type']})" for col in columns]
+        schema.append(f"Table: {table_name}\nColumns: {', '.join(col_strs)}")
+    return "\n\n".join(schema)
+
 def generate_sql(user_query: str) -> str:
-    prompt = f"""Convert the following natural language query into a SQL query.
-Use ONLY the following available tables:
-- sales_order
-- sales_order_item
-- product
-- outbound_delivery
-- billing_document
-- ar_clearing_line
+    schema_info = get_db_schema()
+    prompt = f"""Convert the following natural language query into a SQL query for a SQLite database.
+Here is the strict database schema containing all tables and their exact columns:
+
+{schema_info}
 
 Example Output:
 SELECT COUNT(*) FROM sales_order;
